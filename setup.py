@@ -1,42 +1,42 @@
-#Taken from https://github.com/FedericoStra/cython-package-example/blob/master/setup.py
+
 import os
-from setuptools import setup, find_packages, Extension
 
-try:
-    from Cython.Build import cythonize
-except ImportError:
-    cythonize = None
+from setuptools import setup, Extension
 
 
-# https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#distributing-cython-modules
-def no_cythonize(extensions, **_ignore):
-    for extension in extensions:
-        sources = []
-        for sfile in extension.sources:
-            path, ext = os.path.splitext(sfile)
-            if ext in (".pyx", ".py"):
-                if extension.language == "c++":
-                    ext = ".cpp"
-                else:
-                    ext = ".c"
-                sfile = path + ext
-            sources.append(sfile)
-        extension.sources[:] = sources
-    return extensions
+from Cython.Build import cythonize
+
+__author__ = "Joseph Jackson <joseph.jackson@port.ac.uk>"
 
 
-extensions = [
-    Extension("cypack.fibonacci", ["src/example_package/fibonacci.pyx"]),
+# define cython options
+cython_compile_args = [
+    "-O3"
 ]
 
-CYTHONIZE = bool(int(os.getenv("CYTHONIZE", 0))) and cythonize is not None
+cython_directives = {
+    "language_level": 3,
+}
 
-if CYTHONIZE:
-    compiler_directives = {"language_level": 3, "embedsignature": True}
-    extensions = cythonize(extensions, compiler_directives=compiler_directives)
-else:
-    extensions = no_cythonize(extensions)
+# enable coverage for cython
+if int(os.getenv("CYTHON_LINETRACE", "0")):
+    cython_directives["linetrace"] = True
+    cython_compile_args.append("-DCYTHON_TRACE")
 
+# define compiled extensions
+exts = [
+    Extension(
+        "src.example_package.fibonacci",
+        ["src/example_package/fibonacci.pyx"],
+        language="c",
+        extra_compile_args=cython_compile_args,
+        extra_link_args=[],
+    ),
+]
+
+# -- build the thing
+# this function only manually specifies things that aren't
+# supported by setup.cfg (as of setuptools-30.3.0)
 setup(
-    ext_modules=extensions
+    ext_modules=cythonize(exts, compiler_directives=cython_directives),
 )

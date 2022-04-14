@@ -29,7 +29,6 @@ exts = [
         "src.example_package.fibonacci",
         ["src/example_package/fibonacci.pyx"],
         language="c",
-        libraries=["lal"],
         extra_compile_args=cython_compile_args,
         extra_link_args=[],
     ),
