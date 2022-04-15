@@ -26,8 +26,8 @@ if int(os.getenv("CYTHON_LINETRACE", "0")):
 # define compiled extensions
 exts = [
     Extension(
-        "src.example_package.fibonacci",
-        ["src/example_package/fibonacci.pyx"],
+        "example_package.fibonacci",
+        ["example_package/fibonacci.pyx"],
         language="c",
         extra_compile_args=cython_compile_args,
         extra_link_args=[],
